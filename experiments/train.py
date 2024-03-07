@@ -148,19 +148,19 @@ def main(args: argparse):
         train_loader = DataLoader(train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
-                                  num_workers=4)
+                                  num_workers=0)
 
         valid_dataset = HDF5Dataset(valid_string, pde=pde, mode='valid', base_resolution=base_resolution, super_resolution=super_resolution)
         valid_loader = DataLoader(valid_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=False,
-                                  num_workers=4)
+                                  num_workers=0)
 
         test_dataset = HDF5Dataset(test_string, pde=pde, mode='test', base_resolution=base_resolution, super_resolution=super_resolution)
         test_loader = DataLoader(test_dataset,
                                  batch_size=args.batch_size,
                                  shuffle=False,
-                                 num_workers=4)
+                                 num_workers=0)
     except:
         raise Exception("Datasets could not be loaded properly")
 
@@ -259,7 +259,7 @@ if __name__ == "__main__":
                         help='Model used as PDE solver: [GNN, BaseCNN]')
 
     # Model parameters
-    parser.add_argument('--batch_size', type=int, default=16,
+    parser.add_argument('--batch_size', type=int, default=4,
             help='Number of samples in each minibatch')
     parser.add_argument('--num_epochs', type=int, default=20,
             help='Number of training epochs')
