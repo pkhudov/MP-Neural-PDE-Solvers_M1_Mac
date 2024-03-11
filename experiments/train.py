@@ -174,11 +174,11 @@ def main(args: argparse):
     timestring = f'{dateTimeObj.date().month}{dateTimeObj.date().day}{dateTimeObj.time().hour}{dateTimeObj.time().minute}'
 
     if(args.log):
-        logfile = f'experiments/log/{args.model}_{pde}_{args.experiment}_xresolution{args.base_resolution[1]}-{args.super_resolution[1]}_n{args.neighbors}_tw{args.time_window}_unrolling{args.unrolling}_time{timestring}.csv'
+        logfile = f'experiments/log/{args.model}_{pde}_{args.experiment}_xresolution{args.base_resolution[1]}-{args.super_resolution[1]}_' + (f'n{args.neighbors}' if args.neighbors is not None else f'r{args.radius}') + f'_tw{args.time_window}_unrolling{args.unrolling}_time{timestring}.csv'
         print(f'Writing to log file {logfile}')
         sys.stdout = open(logfile, 'w')
 
-    save_path = f'models/GNN_{pde}_{args.experiment}_xresolution{args.base_resolution[1]}-{args.super_resolution[1]}_n{args.neighbors}_tw{args.time_window}_unrolling{args.unrolling}_time{timestring}.pt'
+    save_path = f'models/GNN_{pde}_{args.experiment}_xresolution{args.base_resolution[1]}-{args.super_resolution[1]}_' + (f'n{args.neighbors}' if args.neighbors is not None else f'r{args.radius}') + f'_tw{args.time_window}_unrolling{args.unrolling}_time{timestring}.pt'
     print(f'Training on dataset {train_string}')
     print(device)
     print(save_path)
@@ -201,6 +201,7 @@ def main(args: argparse):
 
     graph_creator = GraphCreator(pde=pde,
                                  neighbors=args.neighbors,
+                                 radius=args.radius,
                                  time_window=args.time_window,
                                  t_resolution=args.base_resolution[0],
                                  x_resolution=args.base_resolution[1]).to(device)
@@ -276,7 +277,9 @@ if __name__ == "__main__":
     parser.add_argument('--super_resolution', type=lambda s: [int(item) for item in s.split(',')],
             default=[250, 200], help="PDE super resolution for calculating training and validation loss")
     parser.add_argument('--neighbors', type=int,
-                        default=3, help="Neighbors to be considered in GNN solver")
+                        default=None, help="Neighbors to be considered in GNN solver. Provide this or radius") # default=3
+    parser.add_argument('--radius', type=float,
+                        default=0.1, help="Normalised radius to be considered when creating a graph for the GNN solver. Provide this or neighbors") # default=0.1
     parser.add_argument('--time_window', type=int,
                         default=25, help="Time steps to be considered in GNN solver")
     parser.add_argument('--unrolling', type=int,
