@@ -202,6 +202,7 @@ def main(args: argparse):
     graph_creator = GraphCreator(pde=pde,
                                  neighbors=args.neighbors,
                                  radius=args.radius,
+                                 random_probability=args.random_proability,
                                  time_window=args.time_window,
                                  t_resolution=args.base_resolution[0],
                                  x_resolution=args.base_resolution[1]).to(device)
@@ -280,6 +281,8 @@ if __name__ == "__main__":
                         default=None, help="Neighbors to be considered in GNN solver. Provide this or radius") # default=3
     parser.add_argument('--radius', type=float,
                         default=0.1, help="Normalised radius to be considered when creating a graph for the GNN solver. Provide this or neighbors") # default=0.1
+    parser.add_argument('--random_proability', type=float,
+                        default=0.0, help="Probability for random edge creation when creating a graph for the GNN solver")
     parser.add_argument('--time_window', type=int,
                         default=25, help="Time steps to be considered in GNN solver")
     parser.add_argument('--unrolling', type=int,

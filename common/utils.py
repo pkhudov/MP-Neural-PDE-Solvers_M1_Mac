@@ -9,6 +9,7 @@ from typing import Tuple
 from torch_geometric.data import Data
 from torch_cluster import radius_graph, knn_graph
 from equations.PDEs import *
+from torch_geometric.utils.random import erdos_renyi_graph
 
 
 class HDF5Dataset(Dataset):
@@ -125,6 +126,7 @@ class GraphCreator(nn.Module):
                  pde: PDE,
                  neighbors: int = None,
                  radius: float = 0.1,
+                 random_probability: float = 0.0,
                  time_window: int = 5,
                  t_resolution: int = 250,
                  x_resolution: int =100
@@ -135,6 +137,7 @@ class GraphCreator(nn.Module):
             pde (PDE): PDE at hand [CE, WE, ...]
             neighbors (int): how many neighbors the graph has in each direction
             radius (float): normalised radius within which the nodes are connected, 1.0 means all nodes are connected
+            random_probability (float): probability of random edge sampling
             time_window (int): how many time steps are used for PDE prediction
             time_ration (int): temporal ratio between base and super resolution
             space_ration (int): spatial ratio between base and super resolution
@@ -145,6 +148,7 @@ class GraphCreator(nn.Module):
         self.pde = pde
         self.n = neighbors
         self.r = radius
+        self.random_probability = random_probability
         self.tw = time_window
         self.t_res = t_resolution
         self.x_res = x_resolution
@@ -207,11 +211,18 @@ class GraphCreator(nn.Module):
             if self.n is not None:
                 dx = x[0][1] - x[0][0]
                 radius = self.n * dx + 0.0001
-                edge_index = radius_graph(x_pos, r=radius, batch=batch.long(), loop=False)
             else:
                 max_dist = np.max(x[0]) - np.min(x[0])
                 radius = self.r * max_dist + 0.0001
-                edge_index = radius_graph(x_pos, r=radius, batch=batch.long(), loop=False)
+
+            edge_index = radius_graph(x_pos, r=radius, batch=batch.long(), loop=False)
+
+            if self.random_probability > 0.0:
+                #random edge sampling
+                edge_index_random = erdos_renyi_graph(len(x_pos),self.random_probability)
+                #merge edge_index
+                edge_index = torch.unique(torch.cat((edge_index,edge_index_random),dim = 1),dim=1)
+        
         elif f'{self.pde}' == 'WE':
             if self.n is not None:
                 edge_index = knn_graph(x_pos, k=self.n, batch=batch.long(), loop=False)
@@ -219,6 +230,8 @@ class GraphCreator(nn.Module):
                 max_dist = np.max(x[0]) - np.min(x[0]) 
                 radius = self.r * max_dist + 0.0001
                 edge_index = radius_graph(x_pos, r=self.r, batch=batch.long(), loop=False)
+            
+
 
         graph = Data(x=u, edge_index=edge_index)
         graph.y = y
