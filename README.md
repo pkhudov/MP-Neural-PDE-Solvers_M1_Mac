@@ -1,5 +1,5 @@
 # Message Passing Neural PDE Solvers
-Slightly modified version of the <a href="https://github.com/brandstetter-johannes/MP-Neural-PDE-Solvers">code</a> by Johannes Brandstetter*, Daniel Worrall* and Max Welling that allows it to run on a Mac with M1 processor. Also, added the option of choosing radius and random sampling of edges when creating graph from data.
+Slightly modified version of the <a href="https://github.com/brandstetter-johannes/MP-Neural-PDE-Solvers">code</a> by Johannes Brandstetter*, Daniel Worrall* and Max Welling that allows it to run on a CPU without CUDA. Also, added the option of choosing radius and random sampling of edges when creating graph from data.
 
 <a href="https://arxiv.org/abs/2202.03376">Link to the paper</a>
 
